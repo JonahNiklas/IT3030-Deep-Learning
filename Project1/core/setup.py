@@ -101,7 +101,27 @@ class Linear():
     def backward(self, output):
         return output
 
+ACTIVATION_FUNCTIONS = {
+    'sigmoid': Sigmoid(),
+    'relu': ReLU(),
+    'tanh': Tanh(),
+    'softmax': Softmax(),
+    'linear': Linear(),
+}
 
+def cross_entropy(y_true, y_pred):
+    return -np.sum(y_true * np.log(y_pred))
+
+def mean_squared_error(y_true, y_pred):
+    return np.mean(np.sum(np.square(y_true - y_pred)))
+
+def accuracy(y_true, y_pred):
+    return np.mean(y_true == y_pred)
+ERROR_FUNCTIONS = {
+    'cross_entropy': cross_entropy,
+    'mse': mean_squared_error,
+    'accuracy': accuracy,
+}
 def train_model(batch_size:int, num_epochs:int,dataset,network:Network, error_function):
     X_train, X_val, X_test, y_train, y_val, y_test, y_train_encoded = dataset()
 
