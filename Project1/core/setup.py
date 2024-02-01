@@ -1,27 +1,30 @@
 import numpy as np
 
 class Layer:
-    def __init__(self, num_inputs,num_neurons, activation, learning_rate):
+    def __init__(self, num_inputs,num_neurons, activation, learning_rate,weight_range ):
         self.num_neurons = num_neurons
         self.activation = activation
-        self.weights = np.random.randn(num_inputs, num_neurons)
+        self.weights = np.random.uniform(weight_range[0],weight_range[1],(num_inputs, num_neurons))
         self.biases = np.zeros((1, self.num_neurons))
         self.learning_rate = learning_rate
+        self.forward_pass = None
 
     def forward(self, inputs):
         self.inputs = inputs
         self.output = self.activation.forward(np.dot(inputs, self.weights) + self.biases)
+        self.forward_pass = self.output
         return self.output
 
     def backward(self, d_output):
-        d_inputs = np.dot(self.activation.backward(d_output)*d_output, self.weights.T)
+        d_output = np.multiply(self.activation.backward(self.forward_pass),d_output)
+        delta = np.dot(d_output, self.weights.T)
         d_weights = np.dot(self.inputs.T, d_output) # derivate of the output of downstream layer with respect to the weights of this layer
-        d_biases = np.sum(d_output, axis=0) 
-        return d_inputs, d_weights, d_biases
+        d_biases = np.einsum("ij->j",self.activation.backward(d_output)) # derivate of the output of downstream layer with respect to the biases of this layer
+        return delta, d_weights, d_biases
     
     def update_weights(self, d_weights, d_biases):
-        self.weights -= d_weights * self.learning_rate
-        self.biases -= d_biases * self.learning_rate
+        self.weights += d_weights * self.learning_rate
+        self.biases += d_biases * self.learning_rate
 
 class Network:
     def __init__(self, output_function):
@@ -37,8 +40,8 @@ class Network:
             output = layer.forward(output)
         return self.output_function.forward(output)
     
-    def backward(self, error):
-        d_inputs = self.output_function.backward(error)
+    def backward(self, output,error):
+        d_inputs = np.multiply(self.output_function.backward(output),error)
         for layer in reversed(self.layers):
             d_inputs, d_weights, d_biases = layer.backward(d_inputs)
             layer.update_weights(d_weights, d_biases)
@@ -113,7 +116,7 @@ def cross_entropy(y_true, y_pred):
     return -np.sum(y_true * np.log(y_pred))
 
 def mean_squared_error(y_true, y_pred):
-    return np.mean(np.sum(np.square(y_true - y_pred)))
+    return np.mean(np.sum(np.square(y_true - y_pred)))/len(y_true)
 
 def accuracy(y_true, y_pred):
     return np.mean(y_true == y_pred)
@@ -147,7 +150,7 @@ def train_model(batch_size:int, num_epochs:int,dataset,network:Network, error_fu
 
             # Backward pass
             error = output - y_train_shuffled[start:end]
-            network.backward(error)
+            network.backward(output,error)
 
         # training accuracy
         output = network.forward(X_train)
