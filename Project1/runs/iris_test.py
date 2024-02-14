@@ -1,10 +1,12 @@
 # %%
 import sys
+
 sys.path.append('c:/Users/Jonah/Documents/git/IT3030-Deep-Learning/Project1/core')
 
 # %%
 import numpy as np
 from setup import *
+from functions import L1, CrossEntropy, Sigmoid, Softmax
 
 
 # %%
@@ -30,7 +32,7 @@ def load_iris():
 
 # %%
 def initialize_network():
-    network = Network(output_function=Softmax(), error_function=CrossEntropy())
+    network = Network(output_function=Softmax(), error_function=CrossEntropy(),regularization=L1(),regularization_rate=0.001)
     network.add_layer(Layer(num_inputs=4, num_neurons=6, activation=Sigmoid(),learning_rate=0.01,weight_range=[-0.5,0.5]))
     network.add_layer(Layer(num_inputs=6, num_neurons=3, activation=Sigmoid(),learning_rate=0.01,weight_range=[-0.5,0.5]))
     return network

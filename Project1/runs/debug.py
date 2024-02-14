@@ -1,7 +1,10 @@
 # %%
 import datetime
 import sys
+
 sys.path.append('c:/Users/Jonah/Documents/git/IT3030-Deep-Learning/Project1/core')
+
+from functions import REGULARIZATION_FUNCTIONS
 
 # %%
 from Doodler import gen_standard_cases
@@ -26,7 +29,9 @@ def prepare_data():
 
 # %%
 network = Network(output_function=ACTIVATION_FUNCTIONS[LAYER_CONFIG["output_function"]],
-                  error_function=ERROR_FUNCTIONS[GLOBAL_CONFIG["loss"]]
+                    error_function=ERROR_FUNCTIONS[GLOBAL_CONFIG["loss"]],
+                    regularization=REGULARIZATION_FUNCTIONS[GLOBAL_CONFIG["wrt"]],
+                    regularization_rate=GLOBAL_CONFIG["wreg"]
                   )
 input = LAYER_CONFIG["input"]
 for layer in LAYER_CONFIG["layers"]:
@@ -42,7 +47,7 @@ for layer in LAYER_CONFIG["layers"]:
     input = layer["size"]
 
 # %%
-test_error, training_errors, validation_errors = train_model(
+test_error, training_errors, validation_errors, training_losses, validation_losses = train_model(
     dataset=prepare_data,
     network=network,
     num_epochs=GLOBAL_CONFIG["epochs"],
@@ -56,20 +61,36 @@ print("Test error: ", test_error)
 # %%
 import matplotlib.pyplot as plt
 # Plot the accuracy
-plt.title('LR: {}, Layers: {}, Loss: {}, Weight_range: {}'.format(GLOBAL_CONFIG["lrate"],
-                                                "["+",".join([str(layer["size"]) for layer in LAYER_CONFIG["layers"]])+"]",
-                                                GLOBAL_CONFIG["loss"],
-                                                LAYER_CONFIG["layers"][0]["weight_range"]
-                                                )
-          )
-plt.xlabel('Epoch')
-plt.ylabel('Error')
+# plt.title('LR: {}, Layers: {}, Loss: {}, Weight_range: {}'.format(GLOBAL_CONFIG["lrate"],
+#                                                 "["+",".join([str(layer["size"]) for layer in LAYER_CONFIG["layers"]])+"]",
+#                                                 GLOBAL_CONFIG["loss"],
+#                                                 LAYER_CONFIG["layers"][0]["weight_range"]
+#                                                 )
+#           )
+# plt.xlabel('Epoch')
+# plt.ylabel('Error')
 
-plt.plot(training_errors)
-plt.plot(validation_errors)
-plt.scatter(len(training_errors), test_error, color='red', label='Test')
-plt.annotate(str(round(test_error,5)), (len(training_errors), test_error))
-plt.legend(['Training', 'Validation', 'Test'])
+fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(8, 8))
+
+# Plot training errors
+ax1.plot(training_errors)
+ax1.plot(validation_errors)
+ax1.scatter(len(training_errors), test_error, color='red', label='Test')
+ax1.annotate(str(round(test_error, 5)), (len(training_errors), test_error))
+ax1.legend(['Training', 'Validation', 'Test'])
+ax1.set_title('Training Errors')
+ax1.set_xlabel('Epoch')
+ax1.set_ylabel('Error')
+
+# Plot training losses
+ax2.plot(training_losses)
+ax2.plot(validation_losses)
+ax2.legend(['Training', 'Validation'])
+ax2.set_title('Training Losses')
+ax2.set_xlabel('Epoch')
+ax2.set_ylabel('Loss')
+
+plt.tight_layout()
 plt.savefig('./Project1/img/'+datetime.datetime.now().strftime("%d_%H_%M_%S")+"_"+'cases-'+str(GENERATION["cases"])+'_batchsize-'+str(GLOBAL_CONFIG["batch_size"])+'.png')
 plt.show()
 
