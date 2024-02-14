@@ -69,6 +69,8 @@ def train_model(batch_size:int, num_epochs:int,dataset,network:Network, error_fu
     training_losses = []
     validation_errors = []
     validation_losses = []
+    training_accuracy = []
+    validation_accuracy = []
 
     num_samples = X_train.shape[0]
     num_batches = num_samples // batch_size
@@ -90,18 +92,27 @@ def train_model(batch_size:int, num_epochs:int,dataset,network:Network, error_fu
             # Backward pass
             network.backward(target=y_train_shuffled[start:end])
 
-        # training accuracy
+        # training error
         output = network.forward(X_train)
+        training_pred = np.argmax(output, axis=1)
         training_errors.append(error_function.forward(y_train, output))
         training_losses.append(training_errors[-1]+network.penalty_term())
-        # validation accuracy
+        # validation error
         output = network.forward(X_val)
+        validation_pred = np.argmax(output, axis=1)
         validation_errors.append(error_function.forward(y_val, output))
         validation_losses.append(validation_errors[-1]+network.penalty_term())
-    # test accuracy
+        #training accuracy
+        y_train_label = np.argmax(y_train, axis=1)
+        training_accuracy.append(np.mean(y_train_label == training_pred))
+        #validation accuracy
+        y_val_label = np.argmax(y_val, axis=1)
+        validation_accuracy.append(np.mean(y_val_label == validation_pred))
+        
+    # test error
     output = network.forward(X_test)
     test_error = error_function.forward(y_test, output)
-    return test_error, training_errors, validation_errors, training_losses, validation_losses
+    return test_error, training_errors, validation_errors, training_losses, validation_losses, training_accuracy, validation_accuracy
 
 def train_XOR():
     dataset = np.asarray([[0,0,0],[0,1,1],[1,0,1],[1,1,0]])

@@ -15,7 +15,9 @@ rows=50
 cols=50
 input_dim=rows*cols
 assert LAYER_CONFIG["input"] == input_dim
-data, target, labels, img_dim, flat = gen_standard_cases(count=GENERATION["cases"],flat=True,rows=rows,cols=cols, show=False)
+data, target, labels, img_dim, flat = gen_standard_cases(count=GENERATION["cases"],flat=True,rows=rows,cols=cols, show=False,
+                                                         #types=['ball','ring','frame','box','flower']
+                                                         )
 
 # %%
 def prepare_data():
@@ -47,7 +49,7 @@ for layer in LAYER_CONFIG["layers"]:
     input = layer["size"]
 
 # %%
-test_error, training_errors, validation_errors, training_losses, validation_losses = train_model(
+test_error, training_errors, validation_errors, training_losses, validation_losses, training_accuracy, validation_accuracy = train_model(
     dataset=prepare_data,
     network=network,
     num_epochs=GLOBAL_CONFIG["epochs"],
@@ -70,7 +72,7 @@ import matplotlib.pyplot as plt
 # plt.xlabel('Epoch')
 # plt.ylabel('Error')
 
-fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(8, 8))
+fig, (ax1, ax2,ax3) = plt.subplots(3, 1, figsize=(8, 8))
 
 # Plot training errors
 ax1.plot(training_errors)
@@ -78,7 +80,14 @@ ax1.plot(validation_errors)
 ax1.scatter(len(training_errors), test_error, color='red', label='Test')
 ax1.annotate(str(round(test_error, 5)), (len(training_errors), test_error))
 ax1.legend(['Training', 'Validation', 'Test'])
-ax1.set_title('Training Errors')
+ax1.set_title('LR: {}, Lyrs: {}, L: {}, WR: {}, Reg: {}, R_rate: {}'.format(GLOBAL_CONFIG["lrate"],
+                                                "["+",".join([str(layer["size"]) for layer in LAYER_CONFIG["layers"]])+"]",
+                                                GLOBAL_CONFIG["loss"],
+                                                LAYER_CONFIG["layers"][0]["weight_range"],
+                                                GLOBAL_CONFIG["wrt"],
+                                                GLOBAL_CONFIG["wreg"]
+                                                )
+          )
 ax1.set_xlabel('Epoch')
 ax1.set_ylabel('Error')
 
@@ -89,6 +98,14 @@ ax2.legend(['Training', 'Validation'])
 ax2.set_title('Training Losses')
 ax2.set_xlabel('Epoch')
 ax2.set_ylabel('Loss')
+
+# Plot training accuracy
+ax3.plot(training_accuracy)
+ax3.plot(validation_accuracy)
+ax3.legend(['Training', 'Validation'])
+ax3.set_title('Training Accuracy')
+ax3.set_xlabel('Epoch')
+ax3.set_ylabel('Accuracy')
 
 plt.tight_layout()
 plt.savefig('./Project1/img/'+datetime.datetime.now().strftime("%d_%H_%M_%S")+"_"+'cases-'+str(GENERATION["cases"])+'_batchsize-'+str(GLOBAL_CONFIG["batch_size"])+'.png')
