@@ -560,8 +560,14 @@ def gen_convex_polygon(n,xr=(0,1),yr=(0,1),plot=True,vect=False,regular=False):
     xgroups = [[xmin]+sorted(g)+[xmax] for g in xgroups]; ygroups = [[ymin]+sorted(g)+[ymax] for g in ygroups]
     # Compute a sequence of delta-x (and delta-y) that take us from the xmin (ymin) out to xmax (ymax) and then
     # back to xmin (ymin).
-    deltaxs = calc_diffs(xgroups[0]) + [-q for q in calc_diffs(xgroups[1])]
-    deltays = calc_diffs(ygroups[0]) + [-q for q in calc_diffs(ygroups[1])]
+    deltaxs = calc_diffs(xgroups[0])
+    deltays = calc_diffs(ygroups[0])
+    if n > 3:  # N = 3 => there is no second group
+        deltaxs = deltaxs + [-q for q in calc_diffs(xgroups[1])]
+        deltays = deltays + [-q for q in calc_diffs(ygroups[1])]
+    elif n == 3:
+        deltaxs = deltaxs + [xgroups[0][0] - xgroups[0][-1]]
+        deltays = deltays + [ygroups[0][0] - ygroups[0][-1]]
     # Randomly pair the delta-x and delta-y values to produce a set of n vectors.
     vectors = random_pair(deltaxs,deltays)
     # Sort the vectors by angle.  Note that these are angles relative to the origin, not relative to one another, so
