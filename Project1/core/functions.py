@@ -37,19 +37,22 @@ class Tanh():
 # output_functions
 class Softmax():
     def forward(self, x):
-        max_x = np.max(x, axis=1, keepdims=True)
+        max_x = np.max(x)
         exp_x = np.exp(x - max_x)
-        return exp_x / np.sum(exp_x, axis=1, keepdims=True)
+        return exp_x / np.sum(exp_x)
 
     def backward(self, output):
-        m, n = output.shape
-        a = np.eye(output.shape[-1])
-        diagonal = np.zeros((m, n, n),dtype=np.float32)
-        off_diagonal = np.zeros((m, n, n),dtype=np.float32)
-        diagonal = np.einsum('ij,jk->ijk',output,a)
-        off_diagonal = np.einsum('ij,ik->ijk',output,output)
-        jacobian = diagonal - off_diagonal
-        return np.einsum('ijk,ik->ij', jacobian, output)
+        # tried supporting batches but it's not working
+        # m, n = output.shape
+        # a = np.eye(output.shape[-1])
+        # diagonal = np.zeros((m, n, n),dtype=np.float32)
+        # off_diagonal = np.zeros((m, n, n),dtype=np.float32)
+        # diagonal = np.einsum('ij,jk->ijk',output,a)
+        # off_diagonal = np.einsum('ij,ik->ijk',output,output)
+        # jacobian = diagonal - off_diagonal
+        # return jacobian
+        
+        return np.diag(output) - np.outer(output, output)
     
 class Linear():
     def forward(self, x):

@@ -1,7 +1,7 @@
 DATASET_FILE = 'dataset.csv'
 
 GENERATION = {
-    'cases':1000,
+    'cases':2000,
 }
 
 GLOBAL_CONFIG = {
@@ -9,8 +9,8 @@ GLOBAL_CONFIG = {
     'lrate': 0.1,
     'wrt': "L1",
     'wreg': 0.00001,
-    'epochs': 200,
-    'batch_size': 100,
+    'epochs': 10,
+    'batch_size': 1,
 }
 
 LAYER_CONFIG = {
@@ -21,13 +21,7 @@ LAYER_CONFIG = {
         'activation': 'relu',
         'weight_range': [-1, 1],
         'lrate': 0.1
-    },
-    {
-        'size': 400,
-        'activation': 'relu',
-        'weight_range': [-1, 1],
-        'lrate': 0.1
-    },
+    },    
     {
         'size': 200,
         'activation': 'sigmoid',

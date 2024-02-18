@@ -8,7 +8,7 @@ from functions import REGULARIZATION_FUNCTIONS
 
 # %%
 from Doodler import gen_standard_cases
-from number_config_1 import *
+from doodle_config_1 import *
 from setup import *
 
 rows=50

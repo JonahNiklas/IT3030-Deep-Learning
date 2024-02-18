@@ -9,21 +9,37 @@ class Layer:
         self.weights = np.random.uniform(weight_range[0], weight_range[1], (num_inputs, num_neurons))
         self.biases = np.zeros((1, self.num_neurons))
         self.learning_rate = learning_rate
+        
+        self.d_w = np.zeros((num_inputs, num_neurons))
+        self.d_b = np.zeros((1, num_neurons))
 
     def forward(self, inputs):
         self.inputs = inputs
-        self.output = self.activation.forward(np.dot(inputs, self.weights) + self.biases)
+        self.output = np.squeeze(self.activation.forward(np.dot(inputs, self.weights) + self.biases))
         return self.output
     
-    def backward(self, delta, regularization, regularization_rate):
-        delta *= self.activation.backward(self.output)
-        self.weights -= self.learning_rate * np.dot(self.inputs.T, delta)
-        self.biases -= self.learning_rate * np.sum(delta, axis=0, keepdims=True)
+    def backward(self, jac_l_o):
+        jac_o_s = np.diag(self.activation.backward(self.output))
+        jac_o_w = np.outer(self.inputs, np.diag(jac_o_s))
+        jac_l_w = jac_l_o * jac_o_w
+        
+        jac_o_b = np.diag(jac_o_s)
+        jac_l_b = jac_l_o * jac_o_b        
+
+        jac_o_i = jac_o_s.dot(self.weights.T)
+        jac_l_i = jac_l_o.dot(jac_o_i)
+        
+        self.d_w += jac_l_w
+        self.d_b += jac_l_b
+        return jac_l_i
+    
+    def update_weights(self, regularization, regularization_rate):
         if regularization:
             self.weights -= regularization_rate * regularization.backward(self.weights)
-        
-        return np.dot(delta, self.weights.T) #new delta for upstream layer
-    
+        self.weights -= self.learning_rate * self.d_w
+        self.biases -= self.learning_rate * self.d_b
+        self.d_w = np.zeros_like(self.d_w)
+        self.d_b = np.zeros_like(self.d_b)
     def get_weights(self):
         return self.weights
 
@@ -42,13 +58,13 @@ class Network:
         output = inputs
         for layer in self.layers:
             output = layer.forward(output)
-        self.output = self.output_function.forward(output)
-        return np.asarray(self.output)
+        self.output = np.squeeze(self.output_function.forward(output))
+        return self.output
     
     def backward(self, target):
-        delta = self.error_function.backward(target,self.output)*self.output_function.backward(self.output)
+        jac_l_o = np.dot(self.error_function.backward(target,self.output),self.output_function.backward(self.output))
         for layer in reversed(self.layers):
-            delta = layer.backward(delta, self.regularization, self.regularization_rate)
+            jac_l_o = layer.backward(jac_l_o)
             
     def error(self, target):
         return self.error_function.forward(target, self.output)
@@ -61,6 +77,10 @@ class Network:
         for layer in self.layers:
             penalty += self.regularization.forward(layer.get_weights())
         return penalty * self.regularization_rate
+    
+    def update_weights(self):
+        for layer in self.layers:
+            layer.update_weights(self.regularization, self.regularization_rate)
 
 def train_model(batch_size:int, num_epochs:int,dataset,network:Network, error_function):
     X_train, X_val, X_test, y_train, y_val, y_test = dataset()
@@ -73,7 +93,7 @@ def train_model(batch_size:int, num_epochs:int,dataset,network:Network, error_fu
     validation_accuracy = []
 
     num_samples = X_train.shape[0]
-    num_batches = num_samples // batch_size
+    # num_batches = num_samples // batch_size
 
     for epoch in range(num_epochs):
         # Shuffle the training data
@@ -81,17 +101,28 @@ def train_model(batch_size:int, num_epochs:int,dataset,network:Network, error_fu
         X_train_shuffled = X_train[indices]
         y_train_shuffled = y_train[indices]
 
-        # Split the shuffled data into mini-batches
-        for batch in range(num_batches):
-            start = batch * batch_size
-            end = (batch + 1) * batch_size
+    #     # I tried using matrix multiplication but with no success
+    #     for batch in range(num_batches):
+    #         start = batch * batch_size
+    #         end = (batch + 1) * batch_size
 
+    #         # Forward pass
+    #         output = network.forward(X_train_shuffled[start:end])
+
+    #         # Backward pass
+    #         network.backward(target=y_train_shuffled[start:end])
+        for case in range(num_samples):
             # Forward pass
-            output = network.forward(X_train_shuffled[start:end])
+            output = network.forward(X_train_shuffled[case])
 
             # Backward pass
-            network.backward(target=y_train_shuffled[start:end])
-
+            network.backward(target=y_train_shuffled[case])
+            if case % batch_size == 0:
+                # Update weights
+                network.update_weights()
+            
+        print(f"Epoch {epoch+1}/{num_epochs}",end='\r')
+        
         # training error
         output = network.forward(X_train)
         training_pred = np.argmax(output, axis=1)
