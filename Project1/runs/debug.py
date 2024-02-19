@@ -7,17 +7,21 @@ sys.path.append('c:/Users/Jonah/Documents/git/IT3030-Deep-Learning/Project1/core
 from functions import REGULARIZATION_FUNCTIONS
 
 # %%
-from Doodler import gen_standard_cases
-from doodle_config_1 import *
+from Doodler import gen_standard_cases, load_doodle_cases
+from doodle_config_2 import *
 from setup import *
 
-rows=50
-cols=50
-input_dim=rows*cols
-assert LAYER_CONFIG["input"] == input_dim
-data, target, labels, img_dim, flat = gen_standard_cases(count=GENERATION["cases"],flat=True,rows=rows,cols=cols, show=False,
+if(DATASET_FILE == None):    
+    rows=50
+    cols=50
+    input_dim=rows*cols
+    assert LAYER_CONFIG["input"] == input_dim
+    data, target, labels, img_dim, flat = gen_standard_cases(count=500,flat=True,rows=rows,cols=cols, show=False,
                                                          #types=['ball','ring','frame','box','flower']
                                                          )
+else:
+    
+    data, target, labels, img_dim, flat = load_doodle_cases(DATASET_FILE)
 
 # %%
 def prepare_data():
@@ -108,7 +112,7 @@ ax3.set_xlabel('Epoch')
 ax3.set_ylabel('Accuracy')
 
 plt.tight_layout()
-plt.savefig('./Project1/img/'+datetime.datetime.now().strftime("%d_%H_%M_%S")+"_"+'cases-'+str(GENERATION["cases"])+'_batchsize-'+str(GLOBAL_CONFIG["batch_size"])+'.png')
+plt.savefig('./Project1/img/'+datetime.datetime.now().strftime("%d_%H_%M_%S")+"_"+'Config-'+RUN_NAME+'_batchsize-'+str(GLOBAL_CONFIG["batch_size"])+'.png')
 plt.show()
 
 

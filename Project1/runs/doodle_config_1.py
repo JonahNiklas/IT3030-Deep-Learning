@@ -1,15 +1,13 @@
-DATASET_FILE = 'dataset.csv'
+DATASET_FILE = './Project1/core/doodle_cases.pkl'
+RUN_NAME = "Wide"
 
-GENERATION = {
-    'cases':2000,
-}
 
 GLOBAL_CONFIG = {
     'loss': "cross_entropy",
     'lrate': 0.1,
     'wrt': "L1",
     'wreg': 0.00001,
-    'epochs': 10,
+    'epochs': 20,
     'batch_size': 10,
 }
 
