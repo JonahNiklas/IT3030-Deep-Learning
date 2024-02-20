@@ -126,7 +126,7 @@ def train_model(batch_size:int, num_epochs:int,dataset,network:Network, error_fu
         # training error
         output = network.forward(X_train)
         training_pred = np.argmax(output, axis=1)
-        training_errors.append(error_function.forward(y_train, output))
+        training_errors.append(np.mean(error_function.forward(y_train, output)))
         training_losses.append(training_errors[-1]+network.penalty_term())
         # validation error
         output = network.forward(X_val)
@@ -142,8 +142,12 @@ def train_model(batch_size:int, num_epochs:int,dataset,network:Network, error_fu
         
     # test error
     output = network.forward(X_test)
+    print(output)
+    test_pred = np.argmax(output, axis=1)
+    y_test_label = np.argmax(y_test, axis=1)
+    test_accuracy = np.mean(y_test_label == test_pred)
     test_error = error_function.forward(y_test, output)
-    return test_error, training_errors, validation_errors, training_losses, validation_losses, training_accuracy, validation_accuracy
+    return test_error, training_errors, validation_errors, training_losses, validation_losses, training_accuracy, validation_accuracy, test_accuracy
 
 def train_XOR():
     dataset = np.asarray([[0,0,0],[0,1,1],[1,0,1],[1,1,0]])

@@ -6,8 +6,8 @@ GLOBAL_CONFIG = {
     'lrate': 0.1,
     'wrt': "L1",
     'wreg': 0.00001,
-    'epochs': 50,
-    'batch_size': 1,
+    'epochs': 20,
+    'batch_size': 10,
 }
 
 LAYER_CONFIG = {

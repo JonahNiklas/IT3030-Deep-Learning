@@ -8,7 +8,7 @@ from functions import REGULARIZATION_FUNCTIONS
 
 # %%
 from Doodler import gen_standard_cases, load_doodle_cases
-from doodle_config_2 import *
+from doodle_config_3 import *
 from setup import *
 
 if(DATASET_FILE == None):    
@@ -53,7 +53,7 @@ for layer in LAYER_CONFIG["layers"]:
     input = layer["size"]
 
 # %%
-test_error, training_errors, validation_errors, training_losses, validation_losses, training_accuracy, validation_accuracy = train_model(
+test_error, training_errors, validation_errors, training_losses, validation_losses, training_accuracy, validation_accuracy, test_accuracy = train_model(
     dataset=prepare_data,
     network=network,
     num_epochs=GLOBAL_CONFIG["epochs"],
@@ -63,6 +63,7 @@ test_error, training_errors, validation_errors, training_losses, validation_loss
 )
 
 print("Test error: ", test_error)
+print("Test accuracy: ", test_accuracy)
 
 # %%
 import matplotlib.pyplot as plt
@@ -106,6 +107,8 @@ ax2.set_ylabel('Loss')
 # Plot training accuracy
 ax3.plot(training_accuracy)
 ax3.plot(validation_accuracy)
+ax3.scatter(len(training_accuracy), test_accuracy, color='red', label='Test')
+ax3.annotate(str(round(test_accuracy, 5)), (len(training_accuracy), test_accuracy))
 ax3.legend(['Training', 'Validation'])
 ax3.set_title('Training Accuracy')
 ax3.set_xlabel('Epoch')

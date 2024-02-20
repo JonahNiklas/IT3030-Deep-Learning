@@ -79,7 +79,7 @@ class MSE():
 
 class CrossEntropy():
     def forward(self, y_true, y_pred):
-        return -np.mean(y_true * np.log(y_pred))
+        return np.mean(-np.sum(y_true * np.log(y_pred), axis=1))
 
     def backward(self, y_true, y_pred):
         return -y_true / y_pred
@@ -106,4 +106,6 @@ class L2():
 REGULARIZATION_FUNCTIONS = {
     'L1': L1(),
     'L2': L2(),
+    'None': None,
+    None: None,
 }
