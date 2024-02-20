@@ -82,7 +82,7 @@ class Network:
         for layer in self.layers:
             layer.update_weights(self.regularization, self.regularization_rate)
 
-def train_model(batch_size:int, num_epochs:int,dataset,network:Network, error_function):
+def train_model(batch_size:int, num_epochs:int,dataset,network:Network, error_function,verbose=False):
     X_train, X_val, X_test, y_train, y_val, y_test = dataset()
 
     training_errors = []
@@ -121,7 +121,7 @@ def train_model(batch_size:int, num_epochs:int,dataset,network:Network, error_fu
                 # Update weights
                 network.update_weights()
             
-        print(f"Epoch {epoch+1}/{num_epochs}",end='\r')
+        
         
         # training error
         output = network.forward(X_train)
@@ -139,10 +139,12 @@ def train_model(batch_size:int, num_epochs:int,dataset,network:Network, error_fu
         #validation accuracy
         y_val_label = np.argmax(y_val, axis=1)
         validation_accuracy.append(np.mean(y_val_label == validation_pred))
-        
+        if(verbose):
+            print(f"Epoch {epoch+1}/{num_epochs} - Training error: {training_errors[-1]:.4f} - Validation error: {validation_errors[-1]:.4f} - Training accuracy: {training_accuracy[-1]:.4f} - Validation accuracy: {validation_accuracy[-1]:.4f}")
+        else:
+            print(f"Epoch {epoch+1}/{num_epochs}",end='\r')
     # test error
     output = network.forward(X_test)
-    print(output)
     test_pred = np.argmax(output, axis=1)
     y_test_label = np.argmax(y_test, axis=1)
     test_accuracy = np.mean(y_test_label == test_pred)

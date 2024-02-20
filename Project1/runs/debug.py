@@ -59,7 +59,7 @@ test_error, training_errors, validation_errors, training_losses, validation_loss
     num_epochs=GLOBAL_CONFIG["epochs"],
     batch_size=GLOBAL_CONFIG["batch_size"],
     error_function=ERROR_FUNCTIONS[GLOBAL_CONFIG["loss"]],
-    # error_function=lambda y_true, y_pred: np.mean(y_true != y_pred)
+    verbose=VERBOSE
 )
 
 print("Test error: ", test_error)

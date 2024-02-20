@@ -1,5 +1,6 @@
-DATASET_FILE = './Project1/core/doodle_cases.pkl'
+DATASET_FILE = './Project1/core/small_doodle_cases.pkl'
 RUN_NAME = "Deep"
+VERBOSE = True
 
 GLOBAL_CONFIG = {
     'loss': "cross_entropy",
