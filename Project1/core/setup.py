@@ -6,19 +6,23 @@ class Layer:
     def __init__(self, num_inputs,num_neurons, activation, learning_rate, weight_range):
         self.num_neurons = num_neurons
         self.activation = activation
+        # initialize weights and biase
         self.weights = np.random.uniform(weight_range[0], weight_range[1], (num_inputs, num_neurons))
         self.biases = np.zeros((1, self.num_neurons))
         self.learning_rate = learning_rate
         
+        # cumulative gradients used for batch support without matrix multiplication
         self.d_w = np.zeros((num_inputs, num_neurons))
         self.d_b = np.zeros((1, num_neurons))
 
     def forward(self, inputs):
         self.inputs = inputs
+        # use squeeze to remove excess dimensions
         self.output = np.squeeze(self.activation.forward(np.dot(inputs, self.weights) + self.biases))
         return self.output
     
     def backward(self, jac_l_o):
+        # keep track of jacobians of i with respect to j = jac_i_j
         jac_o_s = np.diag(self.activation.backward(self.output))
         jac_o_w = np.outer(self.inputs, np.diag(jac_o_s))
         jac_l_w = jac_l_o * jac_o_w
@@ -29,17 +33,21 @@ class Layer:
         jac_o_i = jac_o_s.dot(self.weights.T)
         jac_l_i = jac_l_o.dot(jac_o_i)
         
+        # update cumulative gradients
         self.d_w += jac_l_w
         self.d_b += jac_l_b
         return jac_l_i
     
     def update_weights(self, regularization, regularization_rate):
+        # use cumulative gradients to update weights and biases
         if regularization:
             self.weights -= regularization_rate * regularization.backward(self.weights)
         self.weights -= self.learning_rate * self.d_w
         self.biases -= self.learning_rate * self.d_b
+        # reset cumulative gradients
         self.d_w = np.zeros_like(self.d_w)
         self.d_b = np.zeros_like(self.d_b)
+
     def get_weights(self):
         return self.weights
 
@@ -62,7 +70,12 @@ class Network:
         return self.output
     
     def backward(self, target):
-        jac_l_o = np.dot(self.error_function.backward(target,self.output),self.output_function.backward(self.output))
+        # calculate jacobian of loss with respect to output, uses output function and error function
+        backward_output = self.output_function.backward(self.output)
+        if isinstance(backward_output, int):
+            jac_l_o = self.error_function.backward(target, self.output)
+        else:
+            jac_l_o = np.dot(self.error_function.backward(target,self.output),backward_output)
         for layer in reversed(self.layers):
             jac_l_o = layer.backward(jac_l_o)
             
@@ -126,7 +139,7 @@ def train_model(batch_size:int, num_epochs:int,dataset,network:Network, error_fu
         # training error
         output = network.forward(X_train)
         training_pred = np.argmax(output, axis=1)
-        training_errors.append(np.mean(error_function.forward(y_train, output)))
+        training_errors.append(error_function.forward(y_train, output))
         training_losses.append(training_errors[-1]+network.penalty_term())
         # validation error
         output = network.forward(X_val)

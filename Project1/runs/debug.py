@@ -1,14 +1,13 @@
-# %%
 import datetime
 import sys
+import matplotlib.pyplot as plt
 
-sys.path.append('c:/Users/Jonah/Documents/git/IT3030-Deep-Learning/Project1/core')
+sys.path.append('c:/Users/Jonah/Documents/gitRepos/IT3030-Deep-Learning/Project1/core')
 
 from functions import REGULARIZATION_FUNCTIONS
 
-# %%
 from Doodler import gen_standard_cases, load_doodle_cases
-from doodle_config_3 import *
+from doodle_config_1 import *
 from setup import *
 
 if(DATASET_FILE == None):    
@@ -23,7 +22,6 @@ else:
     
     data, target, labels, img_dim, flat = load_doodle_cases(DATASET_FILE)
 
-# %%
 def prepare_data():
     from sklearn.model_selection import train_test_split
 
@@ -33,7 +31,6 @@ def prepare_data():
 
     return X_train, X_val, X_test, y_train, y_val, y_test
 
-# %%
 network = Network(output_function=ACTIVATION_FUNCTIONS[LAYER_CONFIG["output_function"]],
                     error_function=ERROR_FUNCTIONS[GLOBAL_CONFIG["loss"]],
                     regularization=REGULARIZATION_FUNCTIONS[GLOBAL_CONFIG["wrt"]],
@@ -52,7 +49,6 @@ for layer in LAYER_CONFIG["layers"]:
                       )
     input = layer["size"]
 
-# %%
 test_error, training_errors, validation_errors, training_losses, validation_losses, training_accuracy, validation_accuracy, test_accuracy = train_model(
     dataset=prepare_data,
     network=network,
@@ -65,17 +61,6 @@ test_error, training_errors, validation_errors, training_losses, validation_loss
 print("Test error: ", test_error)
 print("Test accuracy: ", test_accuracy)
 
-# %%
-import matplotlib.pyplot as plt
-# Plot the accuracy
-# plt.title('LR: {}, Layers: {}, Loss: {}, Weight_range: {}'.format(GLOBAL_CONFIG["lrate"],
-#                                                 "["+",".join([str(layer["size"]) for layer in LAYER_CONFIG["layers"]])+"]",
-#                                                 GLOBAL_CONFIG["loss"],
-#                                                 LAYER_CONFIG["layers"][0]["weight_range"]
-#                                                 )
-#           )
-# plt.xlabel('Epoch')
-# plt.ylabel('Error')
 
 fig, (ax1, ax2,ax3) = plt.subplots(3, 1, figsize=(8, 8))
 
