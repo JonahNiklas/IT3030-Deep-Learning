@@ -14,6 +14,7 @@ df['month'] = pd.to_datetime(df['timestamp']).dt.month
 df['day'] = pd.to_datetime(df['timestamp']).dt.day
 df['hour'] = pd.to_datetime(df['timestamp']).dt.hour
 
+
 df["consumption_t-1"] = df["NO1_consumption"].shift(1)
 
 # Reorder columns
@@ -46,9 +47,9 @@ X_val = scaler.transform(X_val)
 X_test = scaler.transform(X_test)
 # Standardize the target using z-scores
 y_scaler = StandardScaler()
-y_train = y_scaler.fit_transform(y_train.reshape(-1, 1))
-y_val = y_scaler.transform(y_val.reshape(-1, 1))
-y_test = y_scaler.transform(y_test.reshape(-1, 1))
+y_train = y_scaler.fit_transform(y_train.reshape(-1, 1)).flatten()
+y_val = y_scaler.transform(y_val.reshape(-1, 1)).flatten()
+y_test = y_scaler.transform(y_test.reshape(-1, 1)).flatten()
 # Print the shapes of the splits
 print("Train set shape:", X_train.shape, y_train.shape)
 print("Validation set shape:", X_val.shape, y_val.shape)
@@ -97,3 +98,6 @@ def getValidationSet(reshape=False, sequence_length=24):
 
 def getTestSet(reshape=False, sequence_length=24):
     return TimeSeriesDataset(X_test, y_test, sequence_length)
+
+def getTestData():
+    return X_test, y_test
