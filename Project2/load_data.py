@@ -54,6 +54,7 @@ print("Train set shape:", X_train.shape, y_train.shape)
 print("Validation set shape:", X_val.shape, y_val.shape)
 print("Test set shape:", X_test.shape, y_test.shape)
 
+
 class TimeSeriesDataset(Dataset):
     def __init__(self, X, y, sequence_length):
         self.X = X
@@ -68,21 +69,24 @@ class TimeSeriesDataset(Dataset):
     def __getitem__(self, idx):
         return tensor(self.X[idx]).float(), tensor(self.y[idx]).float()
 
-def getTrainingSet(reshape=False, sequence_length=24):
+
+def getTrainingSet(reshape=False, sequence_length=25):
     if reshape:
-        return TimeSeriesDataset(X_train, y_train.reshape(-1,1), sequence_length)
+        return TimeSeriesDataset(X_train, y_train.reshape(-1, 1), sequence_length)
     return TimeSeriesDataset(X_train, y_train, sequence_length)
 
 
-def getValidationSet(reshape=False, sequence_length=24):
+def getValidationSet(reshape=False, sequence_length=25):
     return TimeSeriesDataset(X_val, y_train, sequence_length)
 
 
-def getTestSet(reshape=False, sequence_length=24):
+def getTestSet(reshape=False, sequence_length=25):
     return TimeSeriesDataset(X_test, y_test, sequence_length)
+
 
 def getTestData():
     return X_test, y_test
+
 
 def createTestDataFromHoldOut(filepath):
     df = pd.read_csv(filepath)
