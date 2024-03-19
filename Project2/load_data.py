@@ -19,14 +19,13 @@ def preProcessData(region=1):
     df['day'] = pd.to_datetime(df['timestamp']).dt.day
     df['hour'] = pd.to_datetime(df['timestamp']).dt.hour
 
-    df["consumption_t-1"] = df["NO1_consumption"].shift(1)
+    df["consumption_t-1"] = df[f'NO{region}_consumption'].shift(1)
     # Reorder columns
-    new_df = df[['year', 'month', 'day', 'hour', 'NO1_temperature',
-                'consumption_t-1', 'NO1_consumption']]
+    new_df = df[['year', 'month', 'day', 'hour', f'NO{region}_temperature',
+                'consumption_t-1', f'NO{region}_consumption']]
 
     # remove the first row
     new_df = new_df.iloc[1:]
-    print(new_df.head())
 
     # Convert DataFrame to NumPy array
     data = new_df.to_numpy()
@@ -95,7 +94,7 @@ def getTestData(region=1):
     X_train, X_val, X_test, y_train, y_val, y_test, scaler, y_scaler = preProcessData(
         region)
 
-    return X_test, y_test
+    return X_test, y_test, y_scaler
 
 
 def createTestDataFromHoldOut(filepath, region=1):
@@ -108,9 +107,9 @@ def createTestDataFromHoldOut(filepath, region=1):
     df['month'] = pd.to_datetime(df['timestamp']).dt.month
     df['day'] = pd.to_datetime(df['timestamp']).dt.day
     df['hour'] = pd.to_datetime(df['timestamp']).dt.hour
-    df["consumption_t-1"] = df["NO1_consumption"].shift(1)
-    new_df = df[['year', 'month', 'day', 'hour', 'NO1_temperature',
-                'consumption_t-1', 'NO1_consumption']]
+    df["consumption_t-1"] = df[f'NO{region}_consumption'].shift(1)
+    new_df = df[['year', 'month', 'day', 'hour', f'NO{region}_temperature',
+                 'consumption_t-1', f'NO{region}_consumption']]
     new_df = new_df.iloc[1:]
     data = new_df.to_numpy()
     X = data[:, :-1]
