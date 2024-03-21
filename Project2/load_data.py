@@ -1,3 +1,4 @@
+import csv
 from sklearn.model_selection import train_test_split
 import pandas as pd
 from torch import tensor
@@ -116,4 +117,10 @@ def createTestDataFromHoldOut(filepath, region=1):
     y = data[:, -1]
     X = scaler.transform(X)
     y = y_scaler.transform(y.reshape(-1, 1)).flatten()
-    return X, y
+    return X, y, y_scaler
+
+
+def add_entry_to_results(name, avg, filename):
+    with open(filename, "a", newline="") as csvfile:
+        writer = csv.writer(csvfile)
+        writer.writerow([name, avg])
